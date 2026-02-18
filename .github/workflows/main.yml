@@ -1,0 +1,44 @@
+name: Build and Push to ECR
+
+on:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  id-token: write   # Required for OIDC
+  contents: read
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: "us-east-1"
+      AWS_ACCOUNT_ID: "732822664133"
+      ECR_REPOSITORY: "testecsrepo"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::732822664133:role/accesstoecs
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push Docker image
+        run: |
+          IMAGE_TAG=${{ github.sha }}
+          IMAGE_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
+
+          echo "Building image: $IMAGE_URI"
+          docker build -t $IMAGE_URI .
+
+          echo "Pushing image..."
+          docker push $IMAGE_URI
+
+          echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
