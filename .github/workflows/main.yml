@@ -2,7 +2,7 @@ name: Build and Push to ECR
 
 on:
   push:
-    branches: ["kaushik-04-patch-01"]  # change if needed
+    branches: ["kaushik-04-patch-01"]
 
 permissions:
   id-token: write
@@ -53,4 +53,3 @@ jobs:
 
       - name: Print Image URI
         run: echo "Image pushed to: $IMAGE_URI"
-``
