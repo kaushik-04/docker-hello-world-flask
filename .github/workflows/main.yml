@@ -2,10 +2,10 @@ name: Build and Push to ECR
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["kaushik-04-patch-01"]   # Change if needed
 
 permissions:
-  id-token: write   # Required for OIDC
+  id-token: write       # Required for OIDC
   contents: read
 
 jobs:
@@ -13,18 +13,18 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      AWS_REGION: "us-east-1"
-      AWS_ACCOUNT_ID: "732822664133"
-      ECR_REPOSITORY: "testecsrepo"
+      AWS_REGION: "us-east-1"                               # <-- change if needed
+      AWS_ACCOUNT_ID: "732822664133"                        # <-- your AWS account ID
+      ECR_REPOSITORY: "testecsrepo"                              # <-- your ECR repo name
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::732822664133:role/accesstoecs
+          role-to-assume: arn:aws:ecr:us-east-1:732822664133:repository/testecsrepo   # <-- your IAM role ARN
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to Amazon ECR
@@ -35,10 +35,13 @@ jobs:
           IMAGE_TAG=${{ github.sha }}
           IMAGE_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
 
-          echo "Building image: $IMAGE_URI"
+          echo "Building Docker image: $IMAGE_URI"
           docker build -t $IMAGE_URI .
 
-          echo "Pushing image..."
+          echo "Pushing Docker image to ECR..."
           docker push $IMAGE_URI
 
           echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
+
+      - name: Print Image URI
+        run: echo "Image pushed to: $IMAGE_URI"
