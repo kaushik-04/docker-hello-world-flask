@@ -49,7 +49,10 @@ jobs:
           echo "Pushing Docker image to ECR..."
           docker push "${IMAGE_URI}"
 
+          # Export for following steps
           echo "IMAGE_URI=${IMAGE_URI}" >> "$GITHUB_ENV"
 
       - name: Print Image URI
-        run: echo "Image pushed to: $IMAGE_URI"
+        shell: bash
+        run: |
+          echo "Image pushed to: ${{ env.IMAGE_URI }}"
